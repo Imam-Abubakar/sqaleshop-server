@@ -23,8 +23,8 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
+        cache: 'yarn'
+    - run: yarn install --frozen-lockfile
     - run: |
         touch .env
         echo "${{ secrets.PROD_ENV_FILE }}" > .env
