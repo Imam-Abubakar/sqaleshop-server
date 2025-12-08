@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    /* Reuse styles from order-confirmation.hbs */
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .shipping-info {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    .tracking {
+      background: #e8f5e9;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    {{#if business.settings.logo}}
+      <img src="{{business.settings.logo}}" alt="{{business.name}}" style="max-width: 200px;">
+    {{else}}
+      <h1>{{business.name}}</h1>
+    {{/if}}
+  </div>
+
+  <p>Dear {{order.customer.name}},</p>
+
+  <p>Great news! Your order #{{order.orderNumber}} has been shipped and is on its way to you.</p>
+
+  {{#if order.metadata.tracking}}
+    <div class="tracking">
+      <h3>Tracking Information</h3>
+      <p>Carrier: {{order.metadata.tracking.carrier}}</p>
+      <p>Tracking Number: {{order.metadata.tracking.number}}</p>
+      {{#if order.metadata.tracking.url}}
+        <p><a href="{{order.metadata.tracking.url}}" style="color: #4CAF50;">Track Your Package</a></p>
+      {{/if}}
+    </div>
+  {{/if}}
+
+  <div class="shipping-info">
+    <h2>Shipping Address</h2>
+    <p>
+      {{order.shipping.address.line1}}<br>
+      {{#if order.shipping.address.line2}}
+        {{order.shipping.address.line2}}<br>
+      {{/if}}
+      {{order.shipping.address.city}}, {{order.shipping.address.state}} {{order.shipping.address.postal_code}}<br>
+      {{order.shipping.address.country}}
+    </p>
+  </div>
+
+  <p>If you have any questions about your order, please don't hesitate to contact us.</p>
+
+  <div class="footer">
+    <p>&copy; {{year}} {{business.name}}. All rights reserved.</p>
+  </div>
+</body>
+</html> 

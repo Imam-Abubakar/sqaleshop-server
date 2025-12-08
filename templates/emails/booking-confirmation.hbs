@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .booking-details {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    .total {
+      font-weight: bold;
+      text-align: right;
+      margin-top: 20px;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    {{#if storeLogo}}
+      <img src="{{storeLogo}}" alt="{{storeName}}" style="max-width: 200px;">
+    {{else}}
+      <h1>{{storeName}}</h1>
+    {{/if}}
+  </div>
+
+  <p>Dear {{customerName}},</p>
+
+  <p>Thank you for your booking! We're pleased to confirm that we've received your booking #{{bookingNumber}}.</p>
+
+  <div class="booking-details">
+    <h2>Booking Details</h2>
+    
+    <div class="detail-row">
+      <div>
+        <strong>Booking Number:</strong>
+      </div>
+      <div>#{{bookingNumber}}</div>
+    </div>
+
+    <div class="detail-row">
+      <div>
+        <strong>{{slotName}}</strong><br>
+        {{slotDescription}}
+      </div>
+    </div>
+
+    <div class="detail-row">
+      <div>Booking Type:</div>
+      <div>{{bookingType}}</div>
+    </div>
+
+    <div class="detail-row">
+      <div>Start Date & Time:</div>
+      <div>{{startDateTime}}</div>
+    </div>
+
+    <div class="detail-row">
+      <div>End Date & Time:</div>
+      <div>{{endDateTime}}</div>
+    </div>
+
+    {{#if duration}}
+    <div class="detail-row">
+      <div>Duration:</div>
+      <div>{{duration}}</div>
+    </div>
+    {{/if}}
+
+    {{#if capacity}}
+    <div class="detail-row">
+      <div>Capacity:</div>
+      <div>{{capacity}} {{#if (eq capacity 1)}}person{{else}}people{{/if}}</div>
+    </div>
+    {{/if}}
+
+    {{#if (gt quantity 1)}}
+    <div class="detail-row">
+      <div>Quantity:</div>
+      <div>{{quantity}}</div>
+    </div>
+    {{/if}}
+
+    <div class="total">
+      <p>Subtotal: {{formattedSubtotal}}</p>
+      {{#if discount}}
+        <p>Discount: -{{formattedDiscount}}</p>
+      {{/if}}
+      {{#if tax}}
+        <p>Tax: {{formattedTax}}</p>
+      {{/if}}
+      <p style="font-size: 18px; margin-top: 10px;">Total: {{formattedTotal}}</p>
+    </div>
+  </div>
+
+  <div class="payment-info" style="background: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
+    <h2>Payment Information</h2>
+    <div class="detail-row">
+      <div>Payment Method:</div>
+      <div>{{paymentMethod}}</div>
+    </div>
+    <div class="detail-row">
+      <div>Payment Status:</div>
+      <div>{{paymentStatus}}</div>
+    </div>
+    <div class="detail-row">
+      <div>Amount:</div>
+      <div>{{formattedPaymentAmount}}</div>
+    </div>
+  </div>
+
+  {{#if notes}}
+  <div class="notes" style="background: #fff9e6; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
+    <h2>Your Notes</h2>
+    <p>{{notes}}</p>
+  </div>
+  {{/if}}
+
+  <p>We'll send you another email when your booking is confirmed.</p>
+
+  <div class="footer">
+    <p>&copy; {{year}} {{storeName}}. All rights reserved.</p>
+    {{#if storeAddress}}
+      <p>{{storeAddress}}</p>
+    {{/if}}
+    {{#if storePhone}}
+      <p>Phone: {{storePhone}}</p>
+    {{/if}}
+  </div>
+</body>
+</html>
+

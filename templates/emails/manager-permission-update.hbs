@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Store Manager Permissions Updated</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      text-align: center;
+      padding: 20px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .logo {
+      max-width: 150px;
+      margin-bottom: 10px;
+    }
+    h1 {
+      color: #333;
+      margin-top: 0;
+      font-size: 24px;
+    }
+    .content {
+      padding: 20px 0;
+    }
+    .footer {
+      text-align: center;
+      padding: 20px 0;
+      color: #888;
+      font-size: 12px;
+      border-top: 1px solid #eee;
+    }
+    .button {
+      text-decoration: none;
+
+      display: inline-block;
+      padding: 12px 24px;
+      background-color: #000;
+      color: white !important;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: 600;
+      margin: 20px 0;
+    }
+    .permissions {
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 15px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Your Store Manager Permissions Updated</h1>
+    </div>
+    <div class="content">
+      <p>Hello,</p>
+      <p>Your permissions for managing <strong>{{storeName}}</strong> have been updated.</p>
+      
+      <p>You now have access to the following areas:</p>
+      <div class="permissions">
+        <strong>{{permissions}}</strong>
+      </div>
+      
+      <p>To access the store management dashboard, click the button below:</p>
+      <center>
+        <a href="{{loginUrl}}" class="button">Log in to Sqaleshop</a>
+      </center>
+      
+      <p>If you have any questions about these changes, please contact the store owner.</p>
+      
+      <p>Thank you,<br>The Sqaleshop Team</p>
+    </div>
+    <div class="footer">
+      <p>&copy; {{year}} Sqaleshop. All rights reserved.</p>
+      <p>This is an automated message, please do not reply to this email.</p>
+    </div>
+  </div>
+</body>
+</html> 

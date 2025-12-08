@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .message {
+      background: #e8f5e9;
+      padding: 20px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .refund-details {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    .timeline {
+      background: #f5f5f5;
+      padding: 20px;
+      border-radius: 5px;
+      margin: 20px 0;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    {{#if business.settings.logo}}
+      <img src="{{business.settings.logo}}" alt="{{business.name}}" style="max-width: 200px;">
+    {{else}}
+      <h1>{{business.name}}</h1>
+    {{/if}}
+  </div>
+
+  <div class="message">
+    <h2>Refund Confirmation</h2>
+    <p>We've processed a refund for your order #{{order.orderNumber}}.</p>
+  </div>
+
+  <div class="refund-details">
+    <h3>Refund Details</h3>
+    <p>Amount Refunded: {{currencySymbol}}{{order.refund.amount}}</p>
+    {{#if order.refund.reason}}
+      <p>Reason: {{order.refund.reason}}</p>
+    {{/if}}
+    
+    <div style="margin-top: 20px;">
+      <h4>Original Order Summary</h4>
+      {{#each order.items}}
+        <div style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
+          <strong>{{this.product.name}}</strong><br>
+          Quantity: {{this.quantity}}
+          {{#if this.options}}
+            <br>
+            {{#each this.options}}
+              {{@key}}: {{this}}<br>
+            {{/each}}
+          {{/if}}
+        </div>
+      {{/each}}
+    </div>
+  </div>
+
+  <div class="timeline">
+    <h3>Refund Timeline</h3>
+    <p>The refund has been processed and should appear in your account within 5-10 business days, depending on your payment method and financial institution.</p>
+  </div>
+
+  <p>If you have any questions about your refund, please don't hesitate to contact our support team.</p>
+
+  <div class="footer">
+    <p>&copy; {{year}} {{business.name}}. All rights reserved.</p>
+    <p>
+      Questions? Contact us at 
+      <a href="mailto:{{business.settings.supportEmail}}">{{business.settings.supportEmail}}</a>
+    </p>
+  </div>
+</body>
+</html> 

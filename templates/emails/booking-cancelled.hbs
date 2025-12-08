@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .booking-details {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    .total {
+      font-weight: bold;
+      text-align: right;
+      margin-top: 20px;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    {{#if storeLogo}}
+      <img src="{{storeLogo}}" alt="{{storeName}}" style="max-width: 200px;">
+    {{else}}
+      <h1>{{storeName}}</h1>
+    {{/if}}
+  </div>
+
+  <p>Dear {{customerName}},</p>
+
+  <p>We're sorry to inform you that your booking #{{bookingNumber}} for {{slotName}} has been cancelled.</p>
+
+  <div class="booking-details">
+    <h2>Booking Details</h2>
+    <div class="detail-row">
+      <div>
+        <strong>Booking Number:</strong>
+      </div>
+      <div>#{{bookingNumber}}</div>
+    </div>
+    <div class="detail-row">
+      <div>
+        <strong>{{slotName}}</strong><br>
+        {{slotDescription}}
+      </div>
+    </div>
+    <div class="detail-row">
+      <div>Start Date & Time:</div>
+      <div>{{startDateTime}}</div>
+    </div>
+    <div class="detail-row">
+      <div>End Date & Time:</div>
+      <div>{{endDateTime}}</div>
+    </div>
+    {{#if duration}}
+    <div class="detail-row">
+      <div>Duration:</div>
+      <div>{{duration}}</div>
+    </div>
+    {{/if}}
+    <div class="total">
+      <p style="font-size: 18px;">Total: {{formattedTotal}}</p>
+    </div>
+  </div>
+
+  <p>If you have any questions or would like to reschedule, please contact us.</p>
+
+  <div class="footer">
+    <p>&copy; {{year}} {{storeName}}. All rights reserved.</p>
+    {{#if storeAddress}}
+      <p>{{storeAddress}}</p>
+    {{/if}}
+    {{#if storePhone}}
+      <p>Phone: {{storePhone}}</p>
+    {{/if}}
+  </div>
+</body>
+</html>
+

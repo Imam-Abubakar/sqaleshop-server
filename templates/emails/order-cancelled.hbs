@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .message {
+      background: #ffebee;
+      padding: 20px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .order-summary {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    .support {
+      background: #f5f5f5;
+      padding: 20px;
+      border-radius: 5px;
+      text-align: center;
+      margin: 20px 0;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    {{#if business.settings.logo}}
+      <img src="{{business.settings.logo}}" alt="{{business.name}}" style="max-width: 200px;">
+    {{else}}
+      <h1>{{business.name}}</h1>
+    {{/if}}
+  </div>
+
+  <div class="message">
+    <h2>Order Cancellation Confirmation</h2>
+    <p>Your order #{{order.orderNumber}} has been cancelled.</p>
+  </div>
+
+  <div class="order-summary">
+    <h3>Cancelled Order Details</h3>
+    {{#each order.items}}
+      <div style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
+        <strong>{{this.product.name}}</strong><br>
+        Quantity: {{this.quantity}}
+        {{#if this.options}}
+          <br>
+          {{#each this.options}}
+            {{@key}}: {{this}}<br>
+          {{/each}}
+        {{/if}}
+      </div>
+    {{/each}}
+
+    <div style="margin-top: 20px; text-align: right;">
+      <p>Total Amount: {{currencySymbol}}{{order.total}}</p>
+      {{#if order.paymentStatus}}
+        <p>Payment Status: {{order.paymentStatus}}</p>
+      {{/if}}
+    </div>
+  </div>
+
+  <div class="support">
+    <h3>Need Help?</h3>
+    <p>If you have any questions about your cancelled order or would like to place a new order, our support team is here to help.</p>
+    <p>
+      Email: <a href="mailto:{{business.settings.supportEmail}}">{{business.settings.supportEmail}}</a><br>
+      {{#if business.settings.supportPhone}}
+        Phone: {{business.settings.supportPhone}}
+      {{/if}}
+    </p>
+  </div>
+
+  <div class="footer">
+    <p>&copy; {{year}} {{business.name}}. All rights reserved.</p>
+  </div>
+</body>
+</html> 
