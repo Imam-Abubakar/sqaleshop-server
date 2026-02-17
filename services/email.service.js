@@ -35,20 +35,27 @@ hbs.registerHelper('lt', (a, b) => Number(a) < Number(b));
 
 const sendEmail = async (to, subject, template, context) => {
   if (!to) {
+    // Silently skip if no recipient - this is a validation issue, not a sending failure
+    console.warn('sendEmail called without recipient address');
     return;
   }
 
-  const templatePath = path.join(__dirname, '../templates/emails', `${template}.hbs`);
-  const templateContent = await fs.readFile(templatePath, 'utf-8');
-  const compiledTemplate = hbs.compile(templateContent);
-  const html = compiledTemplate(context);
+  try {
+    const templatePath = path.join(__dirname, '../templates/emails', `${template}.hbs`);
+    const templateContent = await fs.readFile(templatePath, 'utf-8');
+    const compiledTemplate = hbs.compile(templateContent);
+    const html = compiledTemplate(context);
 
-  await transporter.sendMail({
-    from: mailFrom,
-    to,
-    subject,
-    html,
-  });
+    await transporter.sendMail({
+      from: mailFrom,
+      to,
+      subject,
+      html,
+    });
+  } catch (error) {
+    // Re-throw with more context for better error tracking
+    throw new Error(`Failed to send email to ${to} using template ${template}: ${error.message}`);
+  }
 };
 
 /**
@@ -57,15 +64,22 @@ const sendEmail = async (to, subject, template, context) => {
  */
 const sendRawEmail = async (to, subject, html) => {
   if (!to) {
+    // Silently skip if no recipient - this is a validation issue, not a sending failure
+    console.warn('sendRawEmail called without recipient address');
     return;
   }
 
-  await transporter.sendMail({
-    from: mailFrom,
-    to,
-    subject,
-    html,
-  });
+  try {
+    await transporter.sendMail({
+      from: mailFrom,
+      to,
+      subject,
+      html,
+    });
+  } catch (error) {
+    // Re-throw with more context for better error tracking
+    throw new Error(`Failed to send email to ${to}: ${error.message}`);
+  }
 };
 
 /**

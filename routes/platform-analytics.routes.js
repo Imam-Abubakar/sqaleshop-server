@@ -8,7 +8,9 @@ const {
   getRevenueAnalytics,
   getAllUsers,
   getAllStores,
-  updateUserPlan
+  updateUserPlan,
+  getStoreDetails,
+  getUserDetails
 } = require('../controllers/platform-analytics.controller');
 
 // All routes require superadmin access
@@ -18,9 +20,11 @@ router.use(restrictTo('superadmin'));
 router.get('/overview', getPlatformOverview);
 router.get('/users', getUserAnalytics);
 router.get('/users/all', getAllUsers);
+router.get('/users/:userId', getUserDetails);
 router.patch('/users/:userId/plan', updateUserPlan);
 router.get('/stores', getStoreAnalytics);
 router.get('/stores/all', getAllStores);
+router.get('/stores/:storeId', getStoreDetails);
 router.get('/revenue', getRevenueAnalytics);
 
 module.exports = router;

@@ -704,6 +704,286 @@ const getAllStores = async (req, res, next) => {
   }
 };
 
+// Get detailed store information with analytics
+const getStoreDetails = async (req, res, next) => {
+  try {
+    const { storeId } = req.params;
+
+    // Get store details
+    const store = await Store.findById(storeId)
+      .populate('owner', 'name email whatsappNumber createdAt');
+
+    if (!store) {
+      throw new AppError('Store not found', 404);
+    }
+
+    // Get order statistics
+    const orderStats = await Order.aggregate([
+      {
+        $match: {
+          storeId: store._id
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: '$pricing.total' },
+          totalOrders: { $sum: 1 },
+          completedOrders: {
+            $sum: {
+              $cond: [{ $in: ['$status', ['completed', 'delivered']] }, 1, 0]
+            }
+          },
+          pendingOrders: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'pending'] }, 1, 0]
+            }
+          },
+          cancelledOrders: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0]
+            }
+          },
+          completedRevenue: {
+            $sum: {
+              $cond: [{ $in: ['$status', ['completed', 'delivered']] }, '$pricing.total', 0]
+            }
+          },
+          averageOrderValue: { $avg: '$pricing.total' }
+        }
+      }
+    ]);
+
+    // Get product count
+    const totalProducts = await Product.countDocuments({ storeId: store._id });
+
+    // Get customer count (unique customers from orders)
+    const customerStats = await Order.aggregate([
+      {
+        $match: {
+          storeId: store._id
+        }
+      },
+      {
+        $group: {
+          _id: '$customer.email'
+        }
+      },
+      {
+        $count: 'totalCustomers'
+      }
+    ]);
+
+    // Get booking count
+    const totalBookings = await Booking.countDocuments({ storeId: store._id });
+
+    const stats = orderStats[0] || {
+      totalRevenue: 0,
+      totalOrders: 0,
+      completedOrders: 0,
+      pendingOrders: 0,
+      cancelledOrders: 0,
+      completedRevenue: 0,
+      averageOrderValue: 0
+    };
+
+    res.json({
+      _id: store._id,
+      storeName: store.storeName,
+      businessName: store.businessName,
+      url: store.url,
+      logo: store.logo || '',
+      currency: store.currency || 'NGN',
+      businessType: store.businessType,
+      whatsappNumber: store.whatsappNumber || '',
+      description: store.businessDescription || '',
+      location: store.address ? `${store.address.city || ''}${store.address.state ? ', ' + store.address.state : ''}` : '',
+      createdAt: store.createdAt,
+      updatedAt: store.updatedAt || store.createdAt,
+      owner: {
+        _id: store.owner._id,
+        name: store.owner.name || 'Unknown',
+        email: store.owner.email,
+        whatsappNumber: store.owner.whatsappNumber || '',
+        createdAt: store.owner.createdAt
+      },
+      analytics: {
+        views: store.analytics?.views || 0,
+        orders: stats.totalOrders,
+        revenue: stats.completedRevenue,
+        totalRevenue: stats.totalRevenue,
+        completedOrders: stats.completedOrders,
+        pendingOrders: stats.pendingOrders,
+        cancelledOrders: stats.cancelledOrders,
+        averageOrderValue: stats.averageOrderValue || 0,
+        totalProducts,
+        totalCustomers: customerStats[0]?.totalCustomers || 0,
+        bookings: totalBookings
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get detailed user information with timeline
+const getUserDetails = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+
+    // Get user details
+    const user = await User.findById(userId)
+      .select('name email role whatsappNumber onboardingStatus plan createdAt lastLoginAt');
+
+    if (!user) {
+      throw new AppError('User not found', 404);
+    }
+
+    // Get user's stores
+    const stores = await Store.find({ owner: userId })
+      .select('storeName businessName url logo createdAt')
+      .sort({ createdAt: -1 });
+
+    // Get statistics
+    const storeIds = stores.map(s => s._id);
+
+    const [totalProducts, totalOrders, totalBookings] = await Promise.all([
+      Product.countDocuments({ storeId: { $in: storeIds } }),
+      Order.countDocuments({ storeId: { $in: storeIds } }),
+      Booking.countDocuments({ storeId: { $in: storeIds } })
+    ]);
+
+    // Build timeline
+    const timeline = [];
+
+    // User registration
+    timeline.push({
+      type: 'onboarding',
+      title: 'Account Created',
+      description: 'User registered on the platform',
+      timestamp: user.createdAt
+    });
+
+    // Onboarding completion
+    if (user.onboardingStatus === 'completed') {
+      timeline.push({
+        type: 'onboarding',
+        title: 'Onboarding Completed',
+        description: 'User completed the onboarding process',
+        timestamp: user.createdAt // You might have a separate field for this
+      });
+    }
+
+    // Store creations
+    for (const store of stores) {
+      timeline.push({
+        type: 'store_created',
+        title: 'Store Created',
+        description: `Created store "${store.storeName}"`,
+        timestamp: store.createdAt,
+        metadata: {
+          storeId: store._id,
+          storeName: store.storeName,
+          storeUrl: store.url
+        }
+      });
+
+      // Get first product for this store
+      const firstProduct = await Product.findOne({ storeId: store._id })
+        .sort({ createdAt: 1 })
+        .select('name createdAt');
+
+      if (firstProduct) {
+        timeline.push({
+          type: 'first_product',
+          title: 'First Product Added',
+          description: `Added first product "${firstProduct.name}" to ${store.storeName}`,
+          timestamp: firstProduct.createdAt,
+          metadata: {
+            storeId: store._id,
+            storeName: store.storeName,
+            storeUrl: store.url,
+            productName: firstProduct.name
+          }
+        });
+      }
+
+      // Get first order for this store
+      const firstOrder = await Order.findOne({ storeId: store._id })
+        .sort({ createdAt: 1 })
+        .select('createdAt pricing.total');
+
+      if (firstOrder) {
+        timeline.push({
+          type: 'first_order',
+          title: 'First Order Received',
+          description: `Received first order in ${store.storeName}`,
+          timestamp: firstOrder.createdAt,
+          metadata: {
+            storeId: store._id,
+            storeName: store.storeName,
+            storeUrl: store.url
+          }
+        });
+      }
+
+      // Get first booking for this store
+      const firstBooking = await Booking.findOne({ storeId: store._id })
+        .sort({ createdAt: 1 })
+        .select('createdAt');
+
+      if (firstBooking) {
+        timeline.push({
+          type: 'first_booking',
+          title: 'First Booking Received',
+          description: `Received first booking in ${store.storeName}`,
+          timestamp: firstBooking.createdAt,
+          metadata: {
+            storeId: store._id,
+            storeName: store.storeName,
+            storeUrl: store.url
+          }
+        });
+      }
+    }
+
+    // Last login
+    if (user.lastLoginAt) {
+      timeline.push({
+        type: 'login',
+        title: 'Last Login',
+        description: 'User logged into the platform',
+        timestamp: user.lastLoginAt
+      });
+    }
+
+    // Sort timeline by timestamp (most recent first)
+    timeline.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      whatsappNumber: user.whatsappNumber || '',
+      onboardingStatus: user.onboardingStatus,
+      plan: user.plan || 'free',
+      createdAt: user.createdAt,
+      lastLoginAt: user.lastLoginAt,
+      stores,
+      timeline,
+      stats: {
+        totalStores: stores.length,
+        totalProducts,
+        totalOrders,
+        totalBookings
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getPlatformOverview,
   getUserAnalytics,
@@ -711,5 +991,7 @@ module.exports = {
   getRevenueAnalytics,
   getAllUsers,
   getAllStores,
-  updateUserPlan
+  updateUserPlan,
+  getStoreDetails,
+  getUserDetails
 };

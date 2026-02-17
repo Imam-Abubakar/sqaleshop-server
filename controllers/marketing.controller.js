@@ -172,9 +172,8 @@ const sendCampaign = async (req, res, next) => {
     campaign.stats.totalSent = validRecipients.length;
     await campaign.save();
 
-    // Send emails to all recipients
-    let delivered = 0;
-    let bounced = 0;
+    // Send emails to all recipients - using Promise.allSettled to ensure all emails are attempted
+    // even if some fail
     const sendPromises = validRecipients.map(async (recipient) => {
       try {
         await sendRawEmail(
@@ -182,15 +181,31 @@ const sendCampaign = async (req, res, next) => {
           campaign.subject,
           campaign.content
         );
-        delivered++;
+        return { success: true, email: recipient.email };
       } catch (error) {
-        console.error(`Failed to send campaign email to ${recipient.email}:`, error);
-        bounced++;
+        console.error(`Failed to send campaign email to ${recipient.email}:`, error.message);
+        return { success: false, email: recipient.email, error: error.message };
       }
     });
 
-    // Wait for all emails to be sent (or fail)
-    await Promise.allSettled(sendPromises);
+    // Wait for all emails to be sent (or fail) - Promise.allSettled ensures we continue even if some fail
+    const results = await Promise.allSettled(sendPromises);
+
+    // Count successful and failed deliveries from results
+    let delivered = 0;
+    let bounced = 0;
+    
+    results.forEach((result) => {
+      if (result.status === 'fulfilled' && result.value.success) {
+        delivered++;
+      } else {
+        bounced++;
+        // Log the specific error for this email
+        const email = result.value?.email || 'unknown';
+        const error = result.value?.error || result.reason?.message || 'Unknown error';
+        console.error(`Email to ${email} bounced: ${error}`);
+      }
+    });
 
     // Update campaign stats and status
     campaign.status = 'sent';
