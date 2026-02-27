@@ -121,4 +121,12 @@ router.get('/export', analyticsController.exportAnalytics);
 // Get dashboard stats
 router.get('/dashboard/stats', analyticsController.getDashboardStats);
 
+// Get dashboard performance (charts data)
+router.get('/dashboard/performance', analyticsController.getDashboardPerformance);
+
+// Page-specific stats endpoints
+router.get('/orders/stats', analyticsController.getOrdersStats);
+router.get('/products/stats', analyticsController.getProductsStats);
+router.get('/bookings/stats', analyticsController.getBookingsStats);
+
 module.exports = router; 
